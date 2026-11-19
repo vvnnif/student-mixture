@@ -220,7 +220,7 @@ class StudentMixture(GaussianMixture):
         self.precisions_init = precisions_init
         self.dofs_init = dofs_init
 
-    def _check_parameters(self, X):
+    def _check_parameters(self, X, xp=None):
         """Check the Student mixture parameters are well defined."""
         _, n_features = X.shape
         if self.scale_type not in ['spherical', 'tied', 'diag', 'full']:
@@ -247,6 +247,26 @@ class StudentMixture(GaussianMixture):
         if self.dofs_init is not None:
             self.dofs_init = _check_dofs(self.dofs_init,
                                          self.n_components)
+            
+            
+        if self.reg_scale < 0.:
+                    raise ValueError("Invalid value for 'reg_scale': %.5f "
+                                     "regularization on scale must be "
+                                     "non-negative"
+                                     % self.reg_scale)
+                                             
+        if self.algorithm not in ['em', 'mcecm']:
+            raise ValueError("Invalid value for 'algorithm': %s "
+                             "'algorithm' should be in "
+                             "['em', 'mcecm']"
+                             % self.algorithm)
+
+        if not isinstance(self.fixed_dofs, bool):
+            raise TypeError("Invalid value for 'fixed_dofs': %s "
+                            "'fixed_dofs' must be boolean: "
+                            "True or False"
+                            % self.fixed_dofs)
+            
 
     def _check_initial_parameters(self, X):
         """Check values of the basic parameters.
@@ -275,7 +295,7 @@ class StudentMixture(GaussianMixture):
                             "True or False"
                             % self.fixed_dofs)
 
-    def _initialize_parameters(self, X, random_state):
+    def _initialize_parameters(self, X, random_state, xp=None):
         """Initialize the model parameters.
 
         Parameters
@@ -364,7 +384,7 @@ class StudentMixture(GaussianMixture):
             Component labels.
         """
         X = _check_X(X, self.n_components, ensure_min_samples=2)
-        self._check_initial_parameters(X)
+        self._check_parameters(X)
 
         # if we enable warm_start, we will have a unique initialisation
         do_init = not(self.warm_start and hasattr(self, 'converged_'))
@@ -423,7 +443,7 @@ class StudentMixture(GaussianMixture):
 
         return log_resp.argmax(axis=1)
         
-    def _e_step(self, X):
+    def _e_step(self, X, xp=None):
         """E step.
 
         Parameters
@@ -445,7 +465,7 @@ class StudentMixture(GaussianMixture):
         log_prob_norm, log_resp, gamma_priors = self._estimate_log_prob_resp(X)
         return np.mean(log_prob_norm), log_resp, gamma_priors
 
-    def _m_step(self, X, log_resp, gamma_priors):
+    def _m_step(self, X, log_resp, gamma_priors, xp=None):
         """M step.
 
         Parameters
@@ -465,7 +485,7 @@ class StudentMixture(GaussianMixture):
             _estimate_student_parameters(X, resp, gamma_priors, self.reg_scale,
                                          self.scale_type))
         if not self.fixed_dofs:
-            if self.algorithm == 'mcemc':
+            if self.algorithm == 'mcecm':
                 _, log_resp, gamma_priors = self._e_step(X)
             self.dofs_ = _estimate_dofs(np.exp(log_resp), gamma_priors,
                                         self.dofs_, n_features)
@@ -479,7 +499,7 @@ class StudentMixture(GaussianMixture):
             X, self.locations_, self.precisions_cholesky_,
             self.scale_type, self.dofs_)
 
-    def _estimate_log_prob_resp(self, X):
+    def _estimate_log_prob_resp(self, X, xp=None):
         """Estimate log probabilities and responsibilities for each sample.
 
         Compute the log probabilities, weighted log probabilities per
@@ -509,7 +529,7 @@ class StudentMixture(GaussianMixture):
         gamma_priors = self._estimate_gamma_priors(X)
         return log_prob_norm, log_resp, gamma_priors
 
-    def _estimate_gamma_priors(self, X):
+    def _estimate_gamma_priors(self, X, xp=None):
         """Estimate the gamma priors.
 
         Parameters
@@ -522,7 +542,7 @@ class StudentMixture(GaussianMixture):
         """
         return _compute_gamma_priors(X, self.locations_, self.precisions_cholesky_, self.scale_type, self.dofs_)
 
-    def _estimate_log_weights(self):
+    def _estimate_log_weights(self, xp=None):
         """Estimate the logarithm of the weights of the model."""
         return np.log(self.weights_)
 
