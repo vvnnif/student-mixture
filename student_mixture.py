@@ -371,7 +371,7 @@ class StudentMixture(GaussianMixture):
         do_init = not(self.warm_start and hasattr(self, 'converged_'))
         n_init = self.n_init if do_init else 1
 
-        max_lower_bound = -np.infty
+        max_lower_bound = -np.inf
         self.converged_ = False
 
         random_state = check_random_state(self.random_state)
@@ -382,7 +382,7 @@ class StudentMixture(GaussianMixture):
             if do_init:
                 self._initialize_parameters(X, random_state)
 
-            lower_bound = (-np.infty if do_init else self.lower_bound_)
+            lower_bound = (-np.inf if do_init else self.lower_bound_)
 
             for n_iter in range(1, self.max_iter + 1):
                 prev_lower_bound = lower_bound
@@ -474,7 +474,7 @@ class StudentMixture(GaussianMixture):
         self.precisions_cholesky_ = _compute_precision_cholesky(
             self.scales_, self.scale_type)
 
-    def _estimate_log_prob(self, X):
+    def _estimate_log_prob(self, X, xp=None):
         """Estimate the log-probability of the model."""
         return _estimate_log_student_prob(
             X, self.locations_, self.precisions_cholesky_,

@@ -304,7 +304,7 @@ class MultivariateTFit():
 
         self._initialize(X)
 
-        lower_bound = -np.infty
+        lower_bound = -np.inf
 
         for n_iter in range(1, self.max_iter + 1):
             prev_lower_bound = lower_bound
@@ -437,7 +437,7 @@ class MultivariateTFit():
         self.precision_cholesky_ = _compute_precision_cholesky(
             self.scale_, self.scale_type)
 
-    def _estimate_log_prob(self, X):
+    def _estimate_log_prob(self, X, xp=None):
         """Estimate the log-probability of the model."""
         return _estimate_log_student_prob(
             X, self.location_, self.precision_cholesky_, self.scale_type, self.dof_)
