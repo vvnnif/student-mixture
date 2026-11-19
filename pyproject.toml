@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "student-mixture"
+version = "0.1.0"
+description = "Fork of student-mixture"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+dependencies = [
+    "numpy",
+    "scipy",
+]
+
+[tool.setuptools]
+py-modules = [
+    "_generate_prime_list",
+    "_halton",
+    "_multivariate_t_cdf",
+    "_multivariate_t_cdf_qmc",
+    "_multivariate_t_fit_functions",
+    "_multivariate_t_functions",
+    "_student_mixture_functions",
+    "multivariate_t",
+    "mutlivariate_t_fit",
+    "student_mixture",
+]
