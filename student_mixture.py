@@ -418,7 +418,7 @@ class StudentMixture(GaussianMixture):
                     self.converged_ = True
                     break
 
-            self._print_verbose_msg_init_end(lower_bound)
+            self._print_verbose_msg_init_end(lower_bound, init_has_converged=self.converged_)
 
             if lower_bound > max_lower_bound:
                 max_lower_bound = lower_bound
